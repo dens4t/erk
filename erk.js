@@ -12,6 +12,8 @@ function setAktivitas(tanggal = null, jam = null, keterangan){
   var volume = "1";
   var sasaran_kerja_id = "323562";
   var jenis = "kinerja";
+  // get csrf token
+  var csrf_token = document.querySelector('[name="_token"]').value;
   
   fetch("https://erk.pontianak.go.id/input/isiaktifitas", {
     "headers": {
@@ -24,7 +26,7 @@ function setAktivitas(tanggal = null, jam = null, keterangan){
       "sec-fetch-dest": "empty",
       "sec-fetch-mode": "cors",
       "sec-fetch-site": "same-origin",
-      "x-csrf-token": "3FB8oCcJKInxU2ownIZ4JHshep0TTYLjfY1YsUy2",
+      "x-csrf-token": csrf_token,
       "x-requested-with": "XMLHttpRequest"
     },
     "referrer": "https://erk.pontianak.go.id/input/aktivitas",
@@ -48,19 +50,21 @@ function setAktivitas(tanggal = null, jam = null, keterangan){
   });
 }
 function promptAktivitas() {
-  var defaultDate = new Date().toISOString().split('T')[0];
-  var defaultJam = {
-    "jam_mulai": "07",
-    "jam_selesai": "07", 
-    "menit_mulai": "15",
-    "menit_selesai": "45"
-  };
-  var defaultKeterangan = "Melakukan pengecekan berkala terhadap sistem dan data pada aplikasi e-Lapor.";
+  // Load from localStorage or use default
+  var defaultDate = localStorage.getItem('aktivitas_tanggal') || new Date().toISOString().split('T')[0];
+  var defaultJamMulai = localStorage.getItem('aktivitas_jam_mulai') || "07";
+  var defaultMenitMulai = localStorage.getItem('aktivitas_menit_mulai') || "15";
+  var defaultJamSelesai = localStorage.getItem('aktivitas_jam_selesai') || "07";
+  var defaultMenitSelesai = localStorage.getItem('aktivitas_menit_selesai') || "45";
+  var defaultKeterangan = localStorage.getItem('aktivitas_keterangan') || "Melakukan pengecekan berkala terhadap sistem dan data pada aplikasi e-Lapor.";
 
   var tanggal = prompt("Masukkan tanggal (format: YYYY-MM-DD)", defaultDate);
   if (!tanggal) return;
 
-  const jamMulaiSelesai = prompt("Masukkan jam mulai dan jam selesai (contoh: 07:15-07:45 jika 30 menit)", defaultJam.jam_mulai + ":" + defaultJam.menit_mulai + "-" + defaultJam.jam_selesai + ":" + defaultJam.menit_selesai);
+  const jamMulaiSelesai = prompt(
+    "Masukkan jam mulai dan jam selesai (contoh: 07:15-07:45 jika 30 menit)",
+    defaultJamMulai + ":" + defaultMenitMulai + "-" + defaultJamSelesai + ":" + defaultMenitSelesai
+  );
   if (!jamMulaiSelesai) return;
   const jamMulaiSelesaiArray = jamMulaiSelesai.split("-");
   const jamMulai = jamMulaiSelesaiArray[0].split(":")[0];
@@ -70,6 +74,14 @@ function promptAktivitas() {
 
   var keterangan = prompt("Masukkan keterangan aktivitas", defaultKeterangan);
   if (!keterangan) return;
+
+  // Save to localStorage for next time
+  localStorage.setItem('aktivitas_tanggal', tanggal);
+  localStorage.setItem('aktivitas_jam_mulai', jamMulai);
+  localStorage.setItem('aktivitas_menit_mulai', menitMulai);
+  localStorage.setItem('aktivitas_jam_selesai', jamSelesai);
+  localStorage.setItem('aktivitas_menit_selesai', menitSelesai);
+  localStorage.setItem('aktivitas_keterangan', keterangan);
 
   var jam = {
     "jam_mulai": jamMulai,
